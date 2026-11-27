@@ -15,6 +15,7 @@ namespace FlappyCat
     {
         private readonly Timer zamanlayici;
         private readonly Stopwatch kronometre = new Stopwatch();
+        private readonly SesYoneticisi ses;
         private readonly OyunYoneticisi oyun;
         private readonly EkranArayuzu arayuz;
         private bool ziplamaTusuBasili;
@@ -39,7 +40,8 @@ namespace FlappyCat
                 // Simge yüklenemezse varsayılan simge kullanılır.
             }
 
-            oyun = new OyunYoneticisi();
+            ses = new SesYoneticisi(Path.Combine(Varliklar.Klasor, "Sounds"));
+            oyun = new OyunYoneticisi(ses);
             oyun.SkorDegisti += Oyun_SkorDegisti;
             arayuz = new EkranArayuzu(oyun);
 
@@ -139,9 +141,17 @@ namespace FlappyCat
             if (Cursor != istenen) Cursor = istenen;
         }
 
+        protected override void OnDeactivate(EventArgs e)
+        {
+            base.OnDeactivate(e);
+            // Pencereden çıkılırsa oyun otomatik duraklar.
+            if (oyun.Durum == OyunDurumu.Oynuyor) oyun.Duraklat();
+        }
+
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             zamanlayici.Stop();
+            ses.Dispose();
             base.OnFormClosing(e);
         }
     }

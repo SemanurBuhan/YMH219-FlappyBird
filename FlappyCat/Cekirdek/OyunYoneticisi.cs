@@ -7,7 +7,7 @@ namespace FlappyCat
 {
     /// <summary>
     /// Oyunun kurallarını ve durumunu yönetir: skor, hız, engeller,
-    /// çarpışma kontrolü ve oyun durumları arasındaki geçişler.
+    /// çarpışma kontrolü, menü ve oyun durumları arasındaki geçişler.
     /// </summary>
     public class OyunYoneticisi
     {
@@ -15,7 +15,9 @@ namespace FlappyCat
         private readonly List<EngelCifti> engeller = new List<EngelCifti>();
         private readonly List<Bulut> bulutlar = new List<Bulut>();
         private readonly Zemin zemin = new Zemin();
+        private readonly SesYoneticisi ses;
 
+        private OyunDurumu duraklatmaOncesiDurum;
         private PointF carpmaNoktasi;
         private float sonBoslukUst;
         private float sarsinti;
@@ -25,16 +27,20 @@ namespace FlappyCat
         public event EventHandler OyunBitti;
 
         public OyunDurumu Durum { get; private set; }
+        public KarakterTuru SeciliKarakter { get; private set; }
         public Kedi Kedi { get; private set; }
         public int Skor { get; private set; }
         public float Hiz { get; private set; }
         public float Zaman { get; private set; }
         public float BitisSuresi { get; private set; }
+        public bool SesAcik { get { return ses.SesAcik; } }
         public IReadOnlyList<EngelCifti> Engeller { get { return engeller; } }
 
-        public OyunYoneticisi()
+        public OyunYoneticisi(SesYoneticisi ses)
         {
-            Kedi = new Kedi(KarakterTuru.Gri);
+            this.ses = ses;
+            SeciliKarakter = KarakterTuru.Gri;
+            Kedi = new Kedi(SeciliKarakter);
             Hiz = Ayarlar.BaslangicHizi;
 
             for (int i = 0; i < 5; i++)
@@ -45,14 +51,28 @@ namespace FlappyCat
                     rastgele.Next(-40, Ayarlar.EkranGenislik), rastgele.Next(40, 430), rastgele));
             }
 
-            YeniOyun();
+            Durum = OyunDurumu.AnaMenu;
         }
 
         // ---------------- Kullanıcı işlemleri ----------------
 
+        public void KarakterSec(KarakterTuru tur)
+        {
+            SeciliKarakter = tur;
+            Kedi.KarakterAyarla(tur);
+            ButonSesi();
+        }
+
+        public void SonrakiKarakter(int yon)
+        {
+            int adet = Enum.GetValues(typeof(KarakterTuru)).Length;
+            KarakterSec((KarakterTuru)(((int)SeciliKarakter + yon + adet) % adet));
+        }
+
         /// <summary>Yeni oyun (veya yeniden başlat): her şeyi sıfırlar ve ilk zıplamayı bekler.</summary>
         public void YeniOyun()
         {
+            Kedi.KarakterAyarla(SeciliKarakter);
             Kedi.Sifirla(Ayarlar.HazirY);
 
             Skor = 0;
@@ -78,16 +98,53 @@ namespace FlappyCat
             Kedi.Zipla();
         }
 
+        public void Duraklat()
+        {
+            if (Durum != OyunDurumu.Oynuyor && Durum != OyunDurumu.Hazir) return;
+            duraklatmaOncesiDurum = Durum;
+            Durum = OyunDurumu.Duraklatildi;
+        }
+
+        public void DevamEt()
+        {
+            if (Durum != OyunDurumu.Duraklatildi) return;
+            Durum = duraklatmaOncesiDurum;
+        }
+
+        public void SesiAcKapat()
+        {
+            ses.SesAcik = !ses.SesAcik;
+        }
+
+        /// <summary>PLAY, MENU ve karakter seçiminde çalan yumuşak buton sesi.</summary>
+        public void ButonSesi()
+        {
+            ses.Cal("tik");
+        }
+
+        public void AnaMenuyeDon()
+        {
+            Durum = OyunDurumu.AnaMenu;
+            sarsinti = 0;
+            flas = 0;
+        }
+
         // ---------------- Oyun döngüsü ----------------
 
         public void Guncelle(float dt)
         {
             Zaman += dt;
+            if (Durum == OyunDurumu.Duraklatildi) return;
 
             foreach (Bulut b in bulutlar) b.Guncelle(dt);
 
             switch (Durum)
             {
+                case OyunDurumu.AnaMenu:
+                    zemin.Hiz = 1.5f;
+                    zemin.Guncelle(dt);
+                    break;
+
                 case OyunDurumu.Hazir:
                     zemin.Hiz = Hiz;
                     zemin.Guncelle(dt);
@@ -136,8 +193,7 @@ namespace FlappyCat
                 if (!e.Gecildi && e.X + e.Genislik / 2f < kediMerkez)
                 {
                     e.Gecildi = true;
-                    Skor++;
-                    OnSkorDegisti();
+                    PuanKazan();
                 }
             }
 
@@ -155,6 +211,12 @@ namespace FlappyCat
                 OyunuBitir(new PointF(kutu.X + kutu.Width / 2f, Ayarlar.ZeminY));
         }
 
+        private void PuanKazan()
+        {
+            Skor++;
+            OnSkorDegisti();
+        }
+
         private void OyunuBitir(PointF nokta)
         {
             Durum = OyunDurumu.OyunBitti;
@@ -163,6 +225,7 @@ namespace FlappyCat
             sarsinti = 12f;
             flas = 1f;
             Kedi.Carp();
+            ses.Cal("miyav");   // canı yanan minik kedi
 
             if (OyunBitti != null) OyunBitti(this, EventArgs.Empty);
         }
@@ -196,10 +259,17 @@ namespace FlappyCat
                 g.TranslateTransform((float)(rastgele.NextDouble() - 0.5) * sarsinti,
                                      (float)(rastgele.NextDouble() - 0.5) * sarsinti);
 
-            foreach (EngelCifti e in engeller) e.Ciz(g);
+            bool oyunEkrani = Durum != OyunDurumu.AnaMenu;
+            if (oyunEkrani)
+                foreach (EngelCifti e in engeller) e.Ciz(g);
+
             zemin.Ciz(g);
-            Kedi.Ciz(g);
-            if (Durum == OyunDurumu.OyunBitti) PatCiz(g);
+
+            if (oyunEkrani)
+            {
+                Kedi.Ciz(g);
+                if (Durum == OyunDurumu.OyunBitti) PatCiz(g);
+            }
             g.Restore(durum);
 
             if (flas > 0.01f)
