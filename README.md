@@ -1,6 +1,6 @@
 # Flappy Cat 🐱🌈
 
-Windows Forms ile geliştirilmiş, **Flappy Bird benzeri** bir masaüstü oyunu. Oyuncu üç sevimli kediden birini seçer, klavye ile kediyi zıplatır ve yer çekimi etkisiyle düşen kediyi sağdan sola gelen **kedi kulaklı engellerin** arasından geçirmeye çalışır. Hiç çarpmadan ilerledikçe oyun hızlanır ve kedinin kuyruğundan **gökkuşağı izi** çıkar.
+Windows Forms ile geliştirilmiş, **Flappy Bird benzeri** bir masaüstü oyunu. Oyuncu üç  kediden birini seçer, klavye ile kediyi zıplatır ve yer çekimi etkisiyle düşen kediyi sağdan sola gelen **kedi kulaklı engellerin** arasından geçirmeye çalışır. Hiç çarpmadan ilerledikçe oyun hızlanır ve kedinin kuyruğundan **gökkuşağı izi** çıkar.
 
 Proje; Timer ile oyun döngüsü, klavye/fare olayları, çarpışma kontrolü ve oyun durumunun **nesne tabanlı** bir yapı ile yönetilmesini amaçlamaktadır.
 
