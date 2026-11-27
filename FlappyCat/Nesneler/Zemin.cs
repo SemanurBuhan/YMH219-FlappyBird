@@ -3,7 +3,6 @@ using System.Drawing;
 
 namespace FlappyCat
 {
-    /// <summary>Ekranın altında kayan bulut zemin. Kedi buna değerse oyun biter.</summary>
     public class Zemin : OyunNesnesi
     {
         private const int Aralik = 64;

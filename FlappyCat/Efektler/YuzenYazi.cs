@@ -3,7 +3,6 @@ using System.Drawing;
 
 namespace FlappyCat
 {
-    /// <summary>Ekranda belirip yukarı süzülerek kaybolan yazı ("+1", "HIZLANDIN!").</summary>
     public class YuzenYazi
     {
         private readonly string metin;
@@ -38,7 +37,7 @@ namespace FlappyCat
         public void Ciz(Graphics g)
         {
             float gecen = toplamOmur - omur;
-            float buyume = 1f + 0.35f * Math.Max(0f, 1f - gecen / 8f);     // ilk anda büyük görünür
+            float buyume = 1f + 0.35f * Math.Max(0f, 1f - gecen / 8f);
             int saydamlik = (int)(255 * Math.Min(1f, omur / 18f));
             float b = boyut * buyume;
 

@@ -14,12 +14,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Müzik ve efektleri aynı anda, düşük gecikmeyle çalmak için -->
     <PackageReference Include="NAudio" Version="2.2.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Görseller ve sesler derleme çıktısına kopyalanır -->
     <None Update="Assets\**\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 

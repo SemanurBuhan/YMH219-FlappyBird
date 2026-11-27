@@ -7,10 +7,6 @@ using System.Windows.Forms;
 
 namespace FlappyCat
 {
-    /// <summary>
-    /// Oyun penceresi. Timer ile oyun döngüsünü çalıştırır, klavye ve fare
-    /// olaylarını arayüze iletir ve her karede ekranı yeniden çizer.
-    /// </summary>
     public class OyunFormu : Form
     {
         private readonly Timer zamanlayici;
@@ -37,7 +33,6 @@ namespace FlappyCat
             }
             catch (Exception ex) when (ex is IOException || ex is ArgumentException)
             {
-                // Simge yüklenemezse varsayılan simge kullanılır.
             }
 
             ses = new SesYoneticisi(Path.Combine(Varliklar.Klasor, "Sounds"));
@@ -53,7 +48,6 @@ namespace FlappyCat
 
         private void Zamanlayici_Tick(object sender, EventArgs e)
         {
-            // Bilgisayar hızından bağımsız hareket için geçen süreyi kare cinsine çevir.
             double ms = kronometre.Elapsed.TotalMilliseconds;
             kronometre.Restart();
             float dt = (float)Math.Min(ms / (1000.0 / 60.0), 3.0);
@@ -69,7 +63,6 @@ namespace FlappyCat
 
         protected override void OnPaintBackground(PaintEventArgs e)
         {
-            // Arka planı OnPaint içinde çiziyoruz (titremeyi önler).
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -85,7 +78,6 @@ namespace FlappyCat
 
         protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
         {
-            // Yön tuşları, boşluk, Enter ve Esc'nin KeyDown olayına gelmesini sağlar.
             switch (e.KeyCode)
             {
                 case Keys.Up:
@@ -105,7 +97,6 @@ namespace FlappyCat
         {
             base.OnKeyDown(e);
 
-            // Tuş basılı tutulunca sürekli zıplamasın.
             if (ZiplamaTusu(e.KeyCode))
             {
                 if (ziplamaTusuBasili) return;
@@ -144,7 +135,6 @@ namespace FlappyCat
         protected override void OnDeactivate(EventArgs e)
         {
             base.OnDeactivate(e);
-            // Pencereden çıkılırsa oyun otomatik duraklar.
             if (oyun.Durum == OyunDurumu.Oynuyor) oyun.Duraklat();
         }
 

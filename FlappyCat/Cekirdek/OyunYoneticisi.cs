@@ -5,10 +5,6 @@ using System.Drawing.Drawing2D;
 
 namespace FlappyCat
 {
-    /// <summary>
-    /// Oyunun kurallarını ve durumunu yönetir: skor, hız, hız seviyesi,
-    /// engeller, çarpışma kontrolü ve oyun durumları arasındaki geçişler.
-    /// </summary>
     public class OyunYoneticisi
     {
         private readonly Random rastgele = new Random();
@@ -65,8 +61,6 @@ namespace FlappyCat
             Durum = OyunDurumu.AnaMenu;
         }
 
-        // ---------------- Kullanıcı işlemleri ----------------
-
         public void KarakterSec(KarakterTuru tur)
         {
             SeciliKarakter = tur;
@@ -80,7 +74,6 @@ namespace FlappyCat
             KarakterSec((KarakterTuru)(((int)SeciliKarakter + yon + adet) % adet));
         }
 
-        /// <summary>Yeni oyun (veya yeniden başlat): her şeyi sıfırlar ve ilk zıplamayı bekler.</summary>
         public void YeniOyun()
         {
             Kedi.KarakterAyarla(SeciliKarakter);
@@ -131,7 +124,6 @@ namespace FlappyCat
             ses.SesAcik = !ses.SesAcik;
         }
 
-        /// <summary>PLAY, MENU ve karakter seçiminde çalan yumuşak buton sesi.</summary>
         public void ButonSesi()
         {
             ses.Cal("tik");
@@ -145,8 +137,6 @@ namespace FlappyCat
             sarsinti = 0;
             flas = 0;
         }
-
-        // ---------------- Oyun döngüsü ----------------
 
         public void Guncelle(float dt)
         {
@@ -200,9 +190,8 @@ namespace FlappyCat
             zemin.Guncelle(dt);
 
             Kedi.Guncelle(dt);
-            if (Kedi.Y < -Kedi.Yukseklik) Kedi.Y = -Kedi.Yukseklik;   // ekranın çok üstüne çıkamaz
+            if (Kedi.Y < -Kedi.Yukseklik) Kedi.Y = -Kedi.Yukseklik;
 
-            // Engelleri kaydır, ekrandan çıkanları en sağdakinin arkasına taşı
             foreach (EngelCifti e in engeller)
             {
                 e.Hiz = Hiz;
@@ -216,7 +205,6 @@ namespace FlappyCat
                 e.YenidenKonumlandir(enSag + Ayarlar.EngelAraligi, RastgeleBosluk());
             }
 
-            // Skor: engelin ortası kedinin ortasını geçince
             float kediMerkez = Kedi.X + Kedi.Genislik / 2f;
             foreach (EngelCifti e in engeller)
             {
@@ -227,7 +215,6 @@ namespace FlappyCat
                 }
             }
 
-            // Çarpışma kontrolü
             RectangleF kutu = Kedi.Sinirlar;
             foreach (EngelCifti e in engeller)
             {
@@ -253,7 +240,6 @@ namespace FlappyCat
             OnSkorDegisti();
             yazilar.Add(new YuzenYazi("+1", Kedi.X + Kedi.Genislik / 2f, Kedi.Y - 24, 24, Renkler.Sari, 38));
 
-            // Hiç çarpmadan her 3 engelde bir hızlanır
             if (Skor % Ayarlar.HizlanmaAraligi == 0 && HizSeviyesi < Ayarlar.MaksHizSeviyesi)
                 Hizlan();
         }
@@ -275,7 +261,7 @@ namespace FlappyCat
             sarsinti = 12f;
             flas = 1f;
             Kedi.Carp();
-            ses.Cal("miyav");   // canı yanan minik kedi
+            ses.Cal("miyav");
 
             if (Skor > EnYuksekSkor)
             {
@@ -292,7 +278,6 @@ namespace FlappyCat
             if (SkorDegisti != null) SkorDegisti(this, EventArgs.Empty);
         }
 
-        /// <summary>Bir önceki boşluğa göre çok uzak olmayan rastgele bir boşluk konumu üretir.</summary>
         private float RastgeleBosluk()
         {
             float min = Ayarlar.BoslukKenarPayi;
@@ -303,9 +288,6 @@ namespace FlappyCat
             return yeni;
         }
 
-        // ---------------- Çizim ----------------
-
-        /// <summary>Arka plan, bulutlar, engeller, zemin, gökkuşağı izi ve kediyi çizer.</summary>
         public void DunyayiCiz(Graphics g)
         {
             g.DrawImage(Varliklar.Arkaplan, 0, 0, Ayarlar.EkranGenislik, Ayarlar.EkranYukseklik);
@@ -339,7 +321,6 @@ namespace FlappyCat
             }
         }
 
-        /// <summary>Çarpışma anında "PAT!" efekti.</summary>
         private void PatCiz(Graphics g)
         {
             if (BitisSuresi > 50) return;

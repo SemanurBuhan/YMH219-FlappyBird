@@ -5,10 +5,6 @@ using System.Drawing.Drawing2D;
 
 namespace FlappyCat
 {
-    /// <summary>
-    /// Kedi hızlandıkça kuyruğundan çıkan gökkuşağı izi.
-    /// Kedinin geçtiği noktaları tutar; hız seviyesi arttıkça iz uzar ve kalınlaşır.
-    /// </summary>
     public class GokkusagiIzi
     {
         private readonly List<PointF> noktalar = new List<PointF>();
@@ -16,7 +12,6 @@ namespace FlappyCat
         private readonly Random rastgele;
         private float faz;
 
-        /// <summary>0 = görünmez, 1 = tam görünür. Yumuşak açılıp kapanır.</summary>
         public float Yogunluk { get; private set; }
         public int Seviye { get; set; }
 
@@ -37,7 +32,6 @@ namespace FlappyCat
         {
             faz += 0.25f * dt;
 
-            // Eski noktalar dünyayla birlikte sola kayar, yeni nokta kuyruğa eklenir.
             for (int i = 0; i < noktalar.Count; i++)
                 noktalar[i] = new PointF(noktalar[i].X - kaymaHizi * dt, noktalar[i].Y);
             noktalar.Add(kuyruk);
@@ -48,7 +42,6 @@ namespace FlappyCat
             float hedef = aktif && Seviye > 0 ? 1f : 0f;
             Yogunluk += (hedef - Yogunluk) * Math.Min(1f, 0.08f * dt);
 
-            // Parıltılar
             if (Yogunluk > 0.3f && rastgele.NextDouble() < 0.12 * dt * Math.Min(Seviye, 4))
             {
                 parcaciklar.Add(new Parcacik(
@@ -90,7 +83,6 @@ namespace FlappyCat
                            new PointF(xMin - 1, 0), new PointF(xMax + 1, 0),
                            Color.FromArgb(0, renk), Color.FromArgb((int)(245 * Yogunluk), renk)))
                 {
-                    // İzin büyük kısmı canlı, sadece en ucu yavaşça kaybolur
                     firca.Blend = new Blend(3) { Factors = new[] { 0f, 0.85f, 1f }, Positions = new[] { 0f, 0.3f, 1f } };
                     g.FillPolygon(firca, cokgen);
                 }

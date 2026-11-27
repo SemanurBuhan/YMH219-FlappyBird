@@ -5,9 +5,6 @@ using System.IO;
 
 namespace FlappyCat
 {
-    /// <summary>
-    /// Oyunda kullanılan tüm görselleri program başında bir kez yükler.
-    /// </summary>
     public static class Varliklar
     {
         public static string Klasor { get; private set; }
@@ -76,10 +73,6 @@ namespace FlappyCat
             ButonDevam = Gorsel("buton_devam");
         }
 
-        /// <summary>
-        /// PNG dosyasını okur ve hızlı çizim için PArgb biçimine çevirir.
-        /// Dosya kilitli kalmasın diye orijinal hemen kapatılır.
-        /// </summary>
         private static Bitmap Gorsel(string ad)
         {
             string yol = Path.Combine(Klasor, "Sprites", ad + ".png");

@@ -3,7 +3,6 @@ using NAudio.Wave;
 
 namespace FlappyCat
 {
-    /// <summary>Bellekteki sesi bir kez çalar; bitince karıştırıcıdan kendiliğinden çıkar.</summary>
     public class OnbellekSesKaynagi : ISampleProvider
     {
         private readonly OnbellekSes ses;
@@ -29,16 +28,13 @@ namespace FlappyCat
         }
     }
 
-    /// <summary>Bellekteki sesi sonsuz döngüde çalar (arka plan müziği).</summary>
     public class DonguSesKaynagi : ISampleProvider
     {
         private readonly OnbellekSes ses;
         private int konum;
 
-        /// <summary>0 ile 1 arasında ses seviyesi.</summary>
         public float Seviye { get; set; }
 
-        /// <summary>true ise müzik ilerlemeye devam eder ama duyulmaz.</summary>
         public bool Sessiz { get; set; }
 
         public DonguSesKaynagi(OnbellekSes ses)

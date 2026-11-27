@@ -3,7 +3,6 @@ using System.Drawing;
 
 namespace FlappyCat
 {
-    /// <summary>Gökkuşağı izinden dökülen küçük parıltı.</summary>
     public class Parcacik
     {
         private float x, y;
@@ -31,8 +30,8 @@ namespace FlappyCat
 
         public void Ciz(Graphics g, float yogunluk)
         {
-            float oran = omur / toplamOmur;                       // 1 → 0
-            float boyut = olcek * (float)Math.Sin(oran * Math.PI); // büyüyüp küçülür
+            float oran = omur / toplamOmur;
+            float boyut = olcek * (float)Math.Sin(oran * Math.PI);
             Cizim.MerkezdenCiz(g, Varliklar.Parilti, new PointF(x, y), boyut, yogunluk);
         }
     }

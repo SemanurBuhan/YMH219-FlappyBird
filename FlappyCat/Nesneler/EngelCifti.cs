@@ -3,13 +3,8 @@ using System.Drawing.Drawing2D;
 
 namespace FlappyCat
 {
-    /// <summary>
-    /// Üstte ve altta birer kedi kulaklı sütundan oluşan engel çifti.
-    /// Sağdan sola kayar, ekrandan çıkınca yeniden sağa yerleştirilir.
-    /// </summary>
     public class EngelCifti : OyunNesnesi
     {
-        // Görsel ölçüleri (engel_kapak.png: üstte kulaklar, altta kenar)
         private const int KulakYuksekligi = 24;
         private const int KenarYuksekligi = 23;
         private const int KenarX = 5, KenarGenislik = 77;
@@ -62,14 +57,12 @@ namespace FlappyCat
             int kapakH = Varliklar.EngelKapak.Height;
             int govdeH = Varliklar.EngelGovde.Height;
 
-            // Üst engel: ters çevrilmiş, kulaklar boşluğa doğru bakar
             float ustKapakY = BoslukUst - KenarYuksekligi;
             float ustGovdeY = ustKapakY - govdeH;
             if (ustGovdeY > 0) DolguCiz(g, -1, ustGovdeY + 2);
             g.DrawImage(Varliklar.EngelGovdeTers, X, ustGovdeY, w, govdeH);
             g.DrawImage(Varliklar.EngelKapakTers, X, ustKapakY, w, kapakH);
 
-            // Alt engel: kulaklar yukarı bakar
             float altKapakY = BoslukAlt - KulakYuksekligi;
             float altGovdeY = altKapakY + kapakH;
             float dolguY = altGovdeY + govdeH;
@@ -78,7 +71,6 @@ namespace FlappyCat
             g.DrawImage(Varliklar.EngelKapak, X, altKapakY, w, kapakH);
         }
 
-        /// <summary>Sütunun uzayan düz kısmını dikey olarak tekrarlayan desenle doldurur.</summary>
         private void DolguCiz(Graphics g, float y, float yukseklik)
         {
             using (var firca = new TextureBrush(Varliklar.EngelDolgu, WrapMode.Tile))

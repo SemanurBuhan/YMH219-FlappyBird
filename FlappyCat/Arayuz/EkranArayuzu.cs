@@ -4,13 +4,9 @@ using System.Windows.Forms;
 
 namespace FlappyCat
 {
-    /// <summary>
-    /// Ekranların (karakter seçimi, oyun içi göstergeler, menü, oyun bitti)
-    /// çizimini ve fare/klavye girdilerini yönetir.
-    /// </summary>
     public class EkranArayuzu
     {
-        private const float BitisBekleme = 30f;   // oyun bittikten sonra butonların gelmesi için beklenen kare
+        private const float BitisBekleme = 30f;
 
         private static readonly KarakterTuru[] Karakterler = { KarakterTuru.Gri, KarakterTuru.Turuncu, KarakterTuru.Siyah };
 
@@ -53,7 +49,6 @@ namespace FlappyCat
             get { return oyun.Durum == OyunDurumu.OyunBitti && oyun.BitisSuresi >= BitisBekleme; }
         }
 
-        /// <summary>O anki ekranda görünen butonlar.</summary>
         private Buton[] AktifButonlar()
         {
             switch (oyun.Durum)
@@ -66,8 +61,6 @@ namespace FlappyCat
                 default: return new Buton[0];
             }
         }
-
-        // ---------------- Girdiler ----------------
 
         public void FareTiklandi(Point nokta)
         {
@@ -82,7 +75,7 @@ namespace FlappyCat
                 case OyunDurumu.Hazir:
                 case OyunDurumu.Oynuyor:
                     if (btnMenu.Icerir(nokta)) MenuyeBasildi();
-                    else oyun.Zipla();                           // ekrana tıklamak da zıplatır
+                    else oyun.Zipla();
                     break;
 
                 case OyunDurumu.Duraklatildi:
@@ -99,7 +92,6 @@ namespace FlappyCat
             }
         }
 
-        /// <summary>Fare bir butonun veya karakter kartının üstündeyse true döner.</summary>
         public bool FareHareket(Point nokta)
         {
             foreach (Buton b in tumButonlar) b.UzerindeMi = false;
@@ -149,7 +141,6 @@ namespace FlappyCat
             }
         }
 
-        // Buton sesi sadece PLAY, MENU ve karakter seçiminde çalar.
         private void PlayaBasildi()
         {
             oyun.ButonSesi();
@@ -167,8 +158,6 @@ namespace FlappyCat
             oyun.ButonSesi();
             oyun.AnaMenuyeDon();
         }
-
-        // ---------------- Çizim ----------------
 
         public void Ciz(Graphics g)
         {
@@ -233,7 +222,6 @@ namespace FlappyCat
 
             btnPlay.Ciz(g);
 
-            // En yüksek skor
             g.DrawImage(Varliklar.Altin, orta - 92, 494, 22, 28);
             Cizim.Yazi(g, "En Yüksek: " + oyun.EnYuksekSkor, 22f, new PointF(orta - 62, 509), Renkler.Sari, 6f, 0f);
 
@@ -241,7 +229,6 @@ namespace FlappyCat
             Cizim.Yazi(g, "SPACE / YUKARI : Zıpla    ESC : Menü", 15f, new PointF(orta, 588), Renkler.Krem, 4f);
         }
 
-        /// <summary>Oyun içi göstergeler: skor paneli, hız, en yüksek skor ve MENU butonu.</summary>
         private void GostergeCiz(Graphics g, bool menuButonu)
         {
             Bitmap panel = Varliklar.Panel;
@@ -249,7 +236,6 @@ namespace FlappyCat
             g.DrawImage(panel, px, 16, panel.Width, panel.Height);
             Cizim.Yazi(g, oyun.Skor.ToString(), 34f, new PointF(px + panel.Width * 0.38f, 16 + panel.Height / 2f), Renkler.Beyaz, 7f);
 
-            // Hız göstergesi
             var hizKarti = new RectangleF(12, 22, 104, 40);
             Cizim.Kart(g, hizKarti, Renkler.Krem, 14f, 3f);
             string hizMetni = "HIZ x" + oyun.HizCarpani.ToString("0.0");
@@ -259,7 +245,6 @@ namespace FlappyCat
             else
                 Cizim.Yazi(g, hizMetni, 17f, hizNoktasi, Renkler.Kontur, 0f);
 
-            // En yüksek skor
             g.DrawImage(Varliklar.Altin, 16, 72, 17, 22);
             Cizim.Yazi(g, oyun.EnYuksekSkor.ToString(), 18f, new PointF(38, 83), Renkler.Sari, 5f, 0f);
 
@@ -296,7 +281,7 @@ namespace FlappyCat
         {
             if (oyun.BitisSuresi < BitisBekleme * 0.6f) return;
 
-            float giris = Math.Min(1f, (oyun.BitisSuresi - BitisBekleme * 0.6f) / 15f);   // 0 → 1 yumuşak geliş
+            float giris = Math.Min(1f, (oyun.BitisSuresi - BitisBekleme * 0.6f) / 15f);
             KaraltmaCiz(g, (int)(110 * giris));
             float orta = Ayarlar.EkranGenislik / 2f;
             float kayma = (1f - giris) * 40f;

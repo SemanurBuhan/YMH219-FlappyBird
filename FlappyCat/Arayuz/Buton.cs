@@ -2,10 +2,6 @@ using System.Drawing;
 
 namespace FlappyCat
 {
-    /// <summary>
-    /// Tıklanabilir buton. Görseli varsa tasarımdaki buton resmi çizilir,
-    /// yoksa krem renkli kart üzerine ikon ve yazı çizilir.
-    /// </summary>
     public class Buton
     {
         public RectangleF Alan { get; set; }
@@ -35,7 +31,7 @@ namespace FlappyCat
         public void Ciz(Graphics g)
         {
             RectangleF r = Alan;
-            if (UzerindeMi) r.Inflate(4, 3);   // fare üstündeyken hafifçe büyür
+            if (UzerindeMi) r.Inflate(4, 3);
 
             if (Gorsel != null)
             {

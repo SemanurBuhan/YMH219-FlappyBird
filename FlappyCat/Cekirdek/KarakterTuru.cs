@@ -1,6 +1,5 @@
 namespace FlappyCat
 {
-    /// <summary>Seçilebilir kedi karakterleri.</summary>
     public enum KarakterTuru
     {
         Gri,

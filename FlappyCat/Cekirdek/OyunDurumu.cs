@@ -1,12 +1,11 @@
 namespace FlappyCat
 {
-    /// <summary>Oyunun içinde bulunabileceği durumlar.</summary>
     public enum OyunDurumu
     {
-        AnaMenu,        // karakter seçim ekranı
-        Hazir,          // oyun başladı, ilk zıplama bekleniyor
+        AnaMenu,
+        Hazir,
         Oynuyor,
-        Duraklatildi,   // menü açık
+        Duraklatildi,
         OyunBitti
     }
 }

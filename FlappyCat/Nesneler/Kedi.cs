@@ -4,13 +4,9 @@ using System.Drawing.Drawing2D;
 
 namespace FlappyCat
 {
-    /// <summary>
-    /// Oyuncunun kontrol ettiği kedi. Zıplar, yer çekimiyle düşer ve
-    /// düşey hızına göre başını yukarı/aşağı eğer.
-    /// </summary>
     public class Kedi : OyunNesnesi
     {
-        private const float AnimasyonAraligi = 5f;   // kaç karede bir sonraki görsele geçilir
+        private const float AnimasyonAraligi = 5f;
 
         private Bitmap[] kareler;
         private int kareIndeksi;
@@ -50,7 +46,6 @@ namespace FlappyCat
             animasyonSayaci = 0;
         }
 
-        /// <summary>Çarpınca hafifçe yukarı sıçrar, sonra düşer.</summary>
         public void Carp()
         {
             DikeyHiz = -4f;
@@ -61,14 +56,12 @@ namespace FlappyCat
             DikeyHiz = Math.Min(DikeyHiz + Ayarlar.YerCekimi * dt, Ayarlar.MaksDusmeHizi);
             Y += DikeyHiz * dt;
 
-            // Yükselirken burnu yukarı, düşerken yavaşça aşağı bakar.
             float hedefAci = DikeyHiz < 0 ? -22f : Math.Min(-22f + DikeyHiz * 9f, 70f);
             Aci += (hedefAci - Aci) * Math.Min(1f, 0.25f * dt);
 
             Animasyon(dt);
         }
 
-        /// <summary>Oyun başlamadan önce havada hafifçe süzülür.</summary>
         public void Suzul(float zaman, float dt)
         {
             Y = Ayarlar.HazirY + (float)Math.Sin(zaman * 0.08f) * 7f;
@@ -76,7 +69,6 @@ namespace FlappyCat
             Animasyon(dt);
         }
 
-        /// <summary>Oyun bittikten sonra zemine düşer.</summary>
         public void Dus(float dt)
         {
             float zemin = Ayarlar.ZeminY - Yukseklik + 8;
@@ -97,13 +89,11 @@ namespace FlappyCat
             }
         }
 
-        /// <summary>Kuyruk ve boşluklar hariç, gövdeye göre küçültülmüş çarpışma kutusu.</summary>
         public override RectangleF Sinirlar
         {
             get { return new RectangleF(X + 20, Y + 8, Genislik - 26, Yukseklik - 15); }
         }
 
-        /// <summary>Gökkuşağı izinin çıkacağı nokta (kedinin dönüşüne göre kuyruk ucu).</summary>
         public PointF KuyrukNoktasi
         {
             get

@@ -2,7 +2,6 @@ using System.Drawing;
 
 namespace FlappyCat
 {
-    /// <summary>Tasarımdaki renk paleti.</summary>
     public static class Renkler
     {
         public static readonly Color Kontur = Color.FromArgb(59, 36, 51);

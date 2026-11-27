@@ -5,9 +5,6 @@ using System.Drawing.Imaging;
 
 namespace FlappyCat
 {
-    /// <summary>
-    /// Konturlu yazı, yuvarlak köşeli kart ve saydam görsel gibi ortak çizim işlemleri.
-    /// </summary>
     public static class Cizim
     {
         private static FontFamily yaziAilesi;
@@ -37,14 +34,12 @@ namespace FlappyCat
                 }
                 catch (ArgumentException)
                 {
-                    // Bu yazı tipi bilgisayarda yok, sıradakini dene.
                 }
             }
             yaziAilesi = FontFamily.GenericSansSerif;
             yaziStili = FontStyle.Bold;
         }
 
-        /// <summary>Metni yol (path) olarak oluşturur; hiza: 0 = sol, 0.5 = orta, 1 = sağ.</summary>
         private static GraphicsPath YaziYolu(string metin, float boyut, PointF nokta, float hiza)
         {
             var yol = new GraphicsPath();
@@ -58,7 +53,6 @@ namespace FlappyCat
             return yol;
         }
 
-        /// <summary>Kalın kenarlıklı (tasarımdaki gibi) yazı çizer. nokta.Y yazının dikey ortasıdır.</summary>
         public static void Yazi(Graphics g, string metin, float boyut, PointF nokta, Color dolgu,
                                 float konturKalinligi = 6f, float hiza = 0.5f, int saydamlik = 255)
         {
@@ -69,7 +63,6 @@ namespace FlappyCat
             }
         }
 
-        /// <summary>Gökkuşağı renklerinde dolgulu yazı.</summary>
         public static void GokkusagiYazi(Graphics g, string metin, float boyut, PointF nokta,
                                          float konturKalinligi = 7f, float hiza = 0.5f, int saydamlik = 255)
         {
@@ -116,7 +109,6 @@ namespace FlappyCat
             return yol;
         }
 
-        /// <summary>Tasarımdaki butonlar gibi gölgeli, kalın kenarlıklı yuvarlak kart.</summary>
         public static void Kart(Graphics g, RectangleF r, Color dolgu, float yaricap = 16f, float kontur = 4f, bool altSerit = true)
         {
             RectangleF golge = r;
@@ -132,7 +124,6 @@ namespace FlappyCat
                 using (var firca = new SolidBrush(dolgu))
                     g.FillPath(firca, yol);
 
-                // Alt kısımda hafif koyu şerit (tasarımdaki 3B buton hissi)
                 if (altSerit)
                 {
                     RectangleF alt = new RectangleF(r.X, r.Bottom - r.Height * 0.28f, r.Width, r.Height * 0.28f);
@@ -148,7 +139,6 @@ namespace FlappyCat
             }
         }
 
-        /// <summary>Görseli verilen saydamlıkla (0..1) çizer.</summary>
         public static void SaydamGorsel(Graphics g, Image gorsel, RectangleF hedef, float saydamlik)
         {
             if (saydamlik >= 0.99f)
@@ -168,7 +158,6 @@ namespace FlappyCat
             }
         }
 
-        /// <summary>Görseli merkezine göre ölçekleyerek çizer.</summary>
         public static void MerkezdenCiz(Graphics g, Image gorsel, PointF merkez, float olcek, float saydamlik = 1f)
         {
             float w = gorsel.Width * olcek, h = gorsel.Height * olcek;

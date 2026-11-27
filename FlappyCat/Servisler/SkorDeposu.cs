@@ -3,7 +3,6 @@ using System.IO;
 
 namespace FlappyCat
 {
-    /// <summary>En yüksek skoru kullanıcının bilgisayarında bir metin dosyasında saklar.</summary>
     public class SkorDeposu
     {
         private readonly string klasor;
@@ -42,7 +41,6 @@ namespace FlappyCat
             }
             catch (IOException)
             {
-                // Kaydedilemezse oyun yine de çalışmaya devam eder.
             }
             catch (UnauthorizedAccessException)
             {

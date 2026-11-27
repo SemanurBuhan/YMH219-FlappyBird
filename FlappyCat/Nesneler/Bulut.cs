@@ -3,7 +3,6 @@ using System.Drawing;
 
 namespace FlappyCat
 {
-    /// <summary>Arka planda yavaşça kayan, yarı saydam bulut.</summary>
     public class Bulut : OyunNesnesi
     {
         private readonly Bitmap gorsel;
@@ -11,7 +10,6 @@ namespace FlappyCat
         private readonly float temelHiz;
         private readonly Random rastgele;
 
-        /// <summary>Oyun hızlandıkça bulutlar da biraz daha hızlı kayar.</summary>
         public float HizCarpani { get; set; }
 
         public Bulut(Bitmap gorsel, float olcek, float saydamlik, float hiz, float x, float y, Random rastgele)

@@ -3,10 +3,6 @@ using NAudio.Wave;
 
 namespace FlappyCat
 {
-    /// <summary>
-    /// Ses dosyasını bir kez okuyup belleğe alır.
-    /// Böylece her çalışta diskten okunmaz ve ses anında başlar.
-    /// </summary>
     public class OnbellekSes
     {
         public float[] Ornekler { get; private set; }
