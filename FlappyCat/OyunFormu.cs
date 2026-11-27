@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -9,17 +8,16 @@ using System.Windows.Forms;
 namespace FlappyCat
 {
     /// <summary>
-    /// Oyun penceresi. Şimdilik Timer ile çalışan döngüde arka planı,
-    /// kayan bulutları ve bulut zemini çizer.
+    /// Oyun penceresi. Timer ile oyun döngüsünü çalıştırır, klavye ve fare
+    /// olaylarını arayüze iletir ve her karede ekranı yeniden çizer.
     /// </summary>
     public class OyunFormu : Form
     {
         private readonly Timer zamanlayici;
         private readonly Stopwatch kronometre = new Stopwatch();
-        private readonly Random rastgele = new Random();
-        private readonly List<Bulut> bulutlar = new List<Bulut>();
-        private readonly Zemin zemin = new Zemin();
-        private float zaman;
+        private readonly OyunYoneticisi oyun;
+        private readonly EkranArayuzu arayuz;
+        private bool ziplamaTusuBasili;
 
         public OyunFormu()
         {
@@ -28,6 +26,7 @@ namespace FlappyCat
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             StartPosition = FormStartPosition.CenterScreen;
+            KeyPreview = true;
             DoubleBuffered = true;
             SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
 
@@ -40,14 +39,9 @@ namespace FlappyCat
                 // Simge yüklenemezse varsayılan simge kullanılır.
             }
 
-            for (int i = 0; i < 5; i++)
-            {
-                Bitmap b = Varliklar.Bulutlar[rastgele.Next(Varliklar.Bulutlar.Length)];
-                bulutlar.Add(new Bulut(b, 0.55f + (float)rastgele.NextDouble() * 0.35f, 0.75f,
-                    0.25f + (float)rastgele.NextDouble() * 0.35f,
-                    rastgele.Next(-40, Ayarlar.EkranGenislik), rastgele.Next(40, 430), rastgele));
-            }
-            zemin.Hiz = 1.5f;
+            oyun = new OyunYoneticisi();
+            oyun.SkorDegisti += Oyun_SkorDegisti;
+            arayuz = new EkranArayuzu(oyun);
 
             zamanlayici = new Timer { Interval = 15 };
             zamanlayici.Tick += Zamanlayici_Tick;
@@ -57,14 +51,18 @@ namespace FlappyCat
 
         private void Zamanlayici_Tick(object sender, EventArgs e)
         {
+            // Bilgisayar hızından bağımsız hareket için geçen süreyi kare cinsine çevir.
             double ms = kronometre.Elapsed.TotalMilliseconds;
             kronometre.Restart();
             float dt = (float)Math.Min(ms / (1000.0 / 60.0), 3.0);
 
-            zaman += dt;
-            foreach (Bulut b in bulutlar) b.Guncelle(dt);
-            zemin.Guncelle(dt);
+            oyun.Guncelle(dt);
             Invalidate();
+        }
+
+        private void Oyun_SkorDegisti(object sender, EventArgs e)
+        {
+            Text = "Flappy Cat  -  Skor: " + oyun.Skor;
         }
 
         protected override void OnPaintBackground(PaintEventArgs e)
@@ -79,16 +77,66 @@ namespace FlappyCat
             g.InterpolationMode = InterpolationMode.HighQualityBilinear;
             g.PixelOffsetMode = PixelOffsetMode.Half;
 
-            g.DrawImage(Varliklar.Arkaplan, 0, 0, Ayarlar.EkranGenislik, Ayarlar.EkranYukseklik);
-            foreach (Bulut b in bulutlar) b.Ciz(g);
-            zemin.Ciz(g);
+            oyun.DunyayiCiz(g);
+            arayuz.Ciz(g);
+        }
 
-            float orta = Ayarlar.EkranGenislik / 2f;
-            float sallanma = (float)Math.Sin(zaman * 0.05f) * 4f;
-            Cizim.GokkusagiYazi(g, "FLAPPY CAT", 54f, new PointF(orta, 200 + sallanma), 9f);
+        protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
+        {
+            // Yön tuşları, boşluk, Enter ve Esc'nin KeyDown olayına gelmesini sağlar.
+            switch (e.KeyCode)
+            {
+                case Keys.Up:
+                case Keys.Down:
+                case Keys.Left:
+                case Keys.Right:
+                case Keys.Space:
+                case Keys.Enter:
+                case Keys.Escape:
+                    e.IsInputKey = true;
+                    break;
+            }
+            base.OnPreviewKeyDown(e);
+        }
 
-            Bitmap kedi = Varliklar.SecimGorselleri[KarakterTuru.Gri];
-            g.DrawImage(kedi, orta - kedi.Width / 2f, 300 + sallanma * 2, kedi.Width, kedi.Height);
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+
+            // Tuş basılı tutulunca sürekli zıplamasın.
+            if (ZiplamaTusu(e.KeyCode))
+            {
+                if (ziplamaTusuBasili) return;
+                ziplamaTusuBasili = true;
+            }
+
+            arayuz.TusBasildi(e.KeyCode);
+            e.Handled = true;
+            e.SuppressKeyPress = true;
+        }
+
+        protected override void OnKeyUp(KeyEventArgs e)
+        {
+            base.OnKeyUp(e);
+            if (ZiplamaTusu(e.KeyCode)) ziplamaTusuBasili = false;
+        }
+
+        private static bool ZiplamaTusu(Keys tus)
+        {
+            return tus == Keys.Space || tus == Keys.Up || tus == Keys.W;
+        }
+
+        protected override void OnMouseDown(MouseEventArgs e)
+        {
+            base.OnMouseDown(e);
+            if (e.Button == MouseButtons.Left) arayuz.FareTiklandi(e.Location);
+        }
+
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            base.OnMouseMove(e);
+            Cursor istenen = arayuz.FareHareket(e.Location) ? Cursors.Hand : Cursors.Default;
+            if (Cursor != istenen) Cursor = istenen;
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
