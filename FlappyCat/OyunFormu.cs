@@ -41,7 +41,7 @@ namespace FlappyCat
             }
 
             ses = new SesYoneticisi(Path.Combine(Varliklar.Klasor, "Sounds"));
-            oyun = new OyunYoneticisi(ses);
+            oyun = new OyunYoneticisi(ses, new SkorDeposu());
             oyun.SkorDegisti += Oyun_SkorDegisti;
             arayuz = new EkranArayuzu(oyun);
 

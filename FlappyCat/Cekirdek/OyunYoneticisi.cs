@@ -6,16 +6,19 @@ using System.Drawing.Drawing2D;
 namespace FlappyCat
 {
     /// <summary>
-    /// Oyunun kurallarını ve durumunu yönetir: skor, hız, engeller,
-    /// çarpışma kontrolü, menü ve oyun durumları arasındaki geçişler.
+    /// Oyunun kurallarını ve durumunu yönetir: skor, hız, hız seviyesi,
+    /// engeller, çarpışma kontrolü ve oyun durumları arasındaki geçişler.
     /// </summary>
     public class OyunYoneticisi
     {
         private readonly Random rastgele = new Random();
         private readonly List<EngelCifti> engeller = new List<EngelCifti>();
         private readonly List<Bulut> bulutlar = new List<Bulut>();
+        private readonly List<YuzenYazi> yazilar = new List<YuzenYazi>();
         private readonly Zemin zemin = new Zemin();
+        private readonly GokkusagiIzi iz;
         private readonly SesYoneticisi ses;
+        private readonly SkorDeposu skorDeposu;
 
         private OyunDurumu duraklatmaOncesiDurum;
         private PointF carpmaNoktasi;
@@ -30,15 +33,23 @@ namespace FlappyCat
         public KarakterTuru SeciliKarakter { get; private set; }
         public Kedi Kedi { get; private set; }
         public int Skor { get; private set; }
+        public int EnYuksekSkor { get; private set; }
+        public bool YeniRekor { get; private set; }
         public float Hiz { get; private set; }
+        public int HizSeviyesi { get; private set; }
         public float Zaman { get; private set; }
         public float BitisSuresi { get; private set; }
         public bool SesAcik { get { return ses.SesAcik; } }
+        public float HizCarpani { get { return Hiz / Ayarlar.BaslangicHizi; } }
         public IReadOnlyList<EngelCifti> Engeller { get { return engeller; } }
 
-        public OyunYoneticisi(SesYoneticisi ses)
+        public OyunYoneticisi(SesYoneticisi ses, SkorDeposu skorDeposu)
         {
             this.ses = ses;
+            this.skorDeposu = skorDeposu;
+            iz = new GokkusagiIzi(rastgele);
+
+            EnYuksekSkor = skorDeposu.Oku();
             SeciliKarakter = KarakterTuru.Gri;
             Kedi = new Kedi(SeciliKarakter);
             Hiz = Ayarlar.BaslangicHizi;
@@ -76,10 +87,14 @@ namespace FlappyCat
             Kedi.Sifirla(Ayarlar.HazirY);
 
             Skor = 0;
+            YeniRekor = false;
             Hiz = Ayarlar.BaslangicHizi;
+            HizSeviyesi = 0;
             BitisSuresi = 0;
             sarsinti = 0;
             flas = 0;
+            iz.Temizle();
+            yazilar.Clear();
 
             engeller.Clear();
             sonBoslukUst = (Ayarlar.ZeminY - Ayarlar.BoslukYuksekligi) / 2f;
@@ -125,6 +140,8 @@ namespace FlappyCat
         public void AnaMenuyeDon()
         {
             Durum = OyunDurumu.AnaMenu;
+            iz.Temizle();
+            yazilar.Clear();
             sarsinti = 0;
             flas = 0;
         }
@@ -136,7 +153,12 @@ namespace FlappyCat
             Zaman += dt;
             if (Durum == OyunDurumu.Duraklatildi) return;
 
-            foreach (Bulut b in bulutlar) b.Guncelle(dt);
+            float bulutCarpani = Durum == OyunDurumu.Oynuyor ? HizCarpani : 1f;
+            foreach (Bulut b in bulutlar)
+            {
+                b.HizCarpani = bulutCarpani;
+                b.Guncelle(dt);
+            }
 
             switch (Durum)
             {
@@ -149,6 +171,7 @@ namespace FlappyCat
                     zemin.Hiz = Hiz;
                     zemin.Guncelle(dt);
                     Kedi.Suzul(Zaman, dt);
+                    iz.Guncelle(dt, Kedi.KuyrukNoktasi, Hiz, false);
                     break;
 
                 case OyunDurumu.Oynuyor:
@@ -158,9 +181,16 @@ namespace FlappyCat
                 case OyunDurumu.OyunBitti:
                     BitisSuresi += dt;
                     Kedi.Dus(dt);
+                    iz.Guncelle(dt, Kedi.KuyrukNoktasi, 0f, false);
                     sarsinti *= (float)Math.Pow(0.85, dt);
                     flas = Math.Max(0f, flas - 0.07f * dt);
                     break;
+            }
+
+            for (int i = yazilar.Count - 1; i >= 0; i--)
+            {
+                yazilar[i].Guncelle(dt);
+                if (yazilar[i].Bitti) yazilar.RemoveAt(i);
             }
         }
 
@@ -208,13 +238,33 @@ namespace FlappyCat
                 }
             }
             if (kutu.Bottom >= Ayarlar.ZeminY + 6)
+            {
                 OyunuBitir(new PointF(kutu.X + kutu.Width / 2f, Ayarlar.ZeminY));
+                return;
+            }
+
+            iz.Seviye = HizSeviyesi;
+            iz.Guncelle(dt, Kedi.KuyrukNoktasi, Hiz, true);
         }
 
         private void PuanKazan()
         {
             Skor++;
             OnSkorDegisti();
+            yazilar.Add(new YuzenYazi("+1", Kedi.X + Kedi.Genislik / 2f, Kedi.Y - 24, 24, Renkler.Sari, 38));
+
+            // Hiç çarpmadan her 3 engelde bir hızlanır
+            if (Skor % Ayarlar.HizlanmaAraligi == 0 && HizSeviyesi < Ayarlar.MaksHizSeviyesi)
+                Hizlan();
+        }
+
+        private void Hizlan()
+        {
+            HizSeviyesi++;
+            Hiz = Ayarlar.BaslangicHizi + HizSeviyesi * Ayarlar.HizArtisi;
+            iz.Seviye = HizSeviyesi;
+            yazilar.Add(new YuzenYazi("HIZLANDIN! x" + HizCarpani.ToString("0.0"),
+                Ayarlar.EkranGenislik / 2f, 190, 32, Renkler.Beyaz, 75, true));
         }
 
         private void OyunuBitir(PointF nokta)
@@ -226,6 +276,13 @@ namespace FlappyCat
             flas = 1f;
             Kedi.Carp();
             ses.Cal("miyav");   // canı yanan minik kedi
+
+            if (Skor > EnYuksekSkor)
+            {
+                EnYuksekSkor = Skor;
+                YeniRekor = true;
+                skorDeposu.Kaydet(Skor);
+            }
 
             if (OyunBitti != null) OyunBitti(this, EventArgs.Empty);
         }
@@ -248,7 +305,7 @@ namespace FlappyCat
 
         // ---------------- Çizim ----------------
 
-        /// <summary>Arka plan, bulutlar, engeller, zemin ve kediyi çizer.</summary>
+        /// <summary>Arka plan, bulutlar, engeller, zemin, gökkuşağı izi ve kediyi çizer.</summary>
         public void DunyayiCiz(Graphics g)
         {
             g.DrawImage(Varliklar.Arkaplan, 0, 0, Ayarlar.EkranGenislik, Ayarlar.EkranYukseklik);
@@ -267,10 +324,13 @@ namespace FlappyCat
 
             if (oyunEkrani)
             {
+                iz.Ciz(g);
                 Kedi.Ciz(g);
                 if (Durum == OyunDurumu.OyunBitti) PatCiz(g);
             }
             g.Restore(durum);
+
+            foreach (YuzenYazi y in yazilar) y.Ciz(g);
 
             if (flas > 0.01f)
             {

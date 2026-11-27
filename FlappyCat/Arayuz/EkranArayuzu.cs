@@ -233,17 +233,35 @@ namespace FlappyCat
 
             btnPlay.Ciz(g);
 
+            // En yüksek skor
+            g.DrawImage(Varliklar.Altin, orta - 92, 494, 22, 28);
+            Cizim.Yazi(g, "En Yüksek: " + oyun.EnYuksekSkor, 22f, new PointF(orta - 62, 509), Renkler.Sari, 6f, 0f);
+
             Cizim.Yazi(g, "Yön tuşları : Karakter seç    ENTER : Başla", 15f, new PointF(orta, 560), Renkler.Krem, 4f);
             Cizim.Yazi(g, "SPACE / YUKARI : Zıpla    ESC : Menü", 15f, new PointF(orta, 588), Renkler.Krem, 4f);
         }
 
-        /// <summary>Oyun içi göstergeler: skor paneli ve MENU butonu.</summary>
+        /// <summary>Oyun içi göstergeler: skor paneli, hız, en yüksek skor ve MENU butonu.</summary>
         private void GostergeCiz(Graphics g, bool menuButonu)
         {
             Bitmap panel = Varliklar.Panel;
             float px = (Ayarlar.EkranGenislik - panel.Width) / 2f;
             g.DrawImage(panel, px, 16, panel.Width, panel.Height);
             Cizim.Yazi(g, oyun.Skor.ToString(), 34f, new PointF(px + panel.Width * 0.38f, 16 + panel.Height / 2f), Renkler.Beyaz, 7f);
+
+            // Hız göstergesi
+            var hizKarti = new RectangleF(12, 22, 104, 40);
+            Cizim.Kart(g, hizKarti, Renkler.Krem, 14f, 3f);
+            string hizMetni = "HIZ x" + oyun.HizCarpani.ToString("0.0");
+            var hizNoktasi = new PointF(hizKarti.X + hizKarti.Width / 2f, hizKarti.Y + hizKarti.Height / 2f - 1);
+            if (oyun.HizSeviyesi > 0)
+                Cizim.GokkusagiYazi(g, hizMetni, 17f, hizNoktasi, 4f);
+            else
+                Cizim.Yazi(g, hizMetni, 17f, hizNoktasi, Renkler.Kontur, 0f);
+
+            // En yüksek skor
+            g.DrawImage(Varliklar.Altin, 16, 72, 17, 22);
+            Cizim.Yazi(g, oyun.EnYuksekSkor.ToString(), 18f, new PointF(38, 83), Renkler.Sari, 5f, 0f);
 
             if (menuButonu) btnMenu.Ciz(g);
         }
@@ -289,8 +307,21 @@ namespace FlappyCat
 
             var kart = new RectangleF(orta - 140, 218, 280, 206);
             Cizim.Kart(g, kart, Renkler.Krem, 24f, 5f, false);
-            Cizim.Yazi(g, "SKOR", 20f, new PointF(orta, 260), Renkler.KremKoyu, 5f);
-            Cizim.Yazi(g, oyun.Skor.ToString(), 60f, new PointF(orta, 325), Renkler.Beyaz, 10f);
+            Cizim.Yazi(g, "SKOR", 20f, new PointF(orta, 248), Renkler.KremKoyu, 5f);
+            Cizim.Yazi(g, oyun.Skor.ToString(), 52f, new PointF(orta, 296), Renkler.Beyaz, 9f);
+
+            g.DrawImage(Varliklar.Altin, orta - 98, 343, 22, 28);
+            Cizim.Yazi(g, "En Yüksek: " + oyun.EnYuksekSkor, 21f, new PointF(orta - 68, 358), Renkler.Sari, 6f, 0f);
+
+            if (oyun.YeniRekor)
+            {
+                float z = (float)Math.Sin(oyun.Zaman * 0.15f) * 3f;
+                Cizim.GokkusagiYazi(g, "YENİ REKOR!", 24f, new PointF(orta, 398 + z), 6f);
+            }
+            else
+            {
+                Cizim.Yazi(g, "Hız seviyesi: " + oyun.HizSeviyesi, 17f, new PointF(orta, 398), Renkler.KremKoyu, 4f);
+            }
 
             btnTekrar.Ciz(g);
             btnAnaMenu.Ciz(g);
